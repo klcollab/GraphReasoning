@@ -112,7 +112,7 @@ def documents2Dataframe(documents) -> pd.DataFrame:
     for chunk in documents:
         row = {
             "text": chunk,
-           # **chunk.metadata,
+            **chunk.metadata,
             "chunk_id": uuid.uuid4().hex,
         }
         rows = rows + [row]
