@@ -1,126 +1,41 @@
 from GraphReasoning.graph_tools import *
 from GraphReasoning.utils import *
 from GraphReasoning.graph_generation import *
-import networkx as nx
-import matplotlib.pyplot as plt
+
 import os
-
-import copy
-import re
-
-from IPython.display import display, Markdown
-
 import markdown2
 import pdfkit
-
- 
 import uuid
-import pandas as pd
-import numpy as np
+import copy
+from copy import deepcopy
+import re
+import random
 
+from IPython.display import display, Markdown
+import networkx as nx
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import networkx as nx
-import os
-from langchain.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
-from langchain.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
+from langchain_community.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
+from langchain_community.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pathlib import Path
-import random
 from pyvis.network import Network
-
 from tqdm.notebook import tqdm
 
-
-import seaborn as sns
-palette = "hls"
-
-
-import uuid
-import pandas as pd
-import numpy as np
-
-from transformers import AutoTokenizer, AutoModel
-import torch
-from scipy.spatial.distance import cosine
-from sklearn.decomposition import PCA
-import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-import seaborn as sns  # For more attractive plotting
-
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
 import transformers
 from transformers import logging
-
- 
-logging.set_verbosity_error()
-
-import re
- 
-from IPython.display import display, Markdown
-
-import markdown2
-import pdfkit
-
- 
-import uuid
-import pandas as pd
-import numpy as np
-
-import pandas as pd
-import numpy as np
-import networkx as nx
-import os
-from langchain.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
-from langchain.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from pathlib import Path
-import random
-from pyvis.network import Network
-
-from tqdm.notebook import tqdm
-
-
-import seaborn as sns
-palette = "hls"
-
-
-import uuid
-import pandas as pd
-import numpy as np
-
 from transformers import AutoTokenizer, AutoModel
 import torch
 from scipy.spatial.distance import cosine
 from sklearn.decomposition import PCA
-import numpy as np
-from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
 import seaborn as sns  # For more attractive plotting
-
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-
-
-import networkx as nx
-import random
-import numpy as np
-from copy import deepcopy
-import numpy as np
-import random
+palette = "hls"
+ 
+logging.set_verbosity_error()
+ 
 from datetime import datetime
-
-import random
-import numpy as np
-from copy import deepcopy
-import numpy as np
-import random
-from datetime import datetime
-
 
 def euclidean_distance(vec1, vec2):
     """Calculate the Euclidean distance between two vectors."""
@@ -365,7 +280,7 @@ def find_path( G, node_embeddings,  tokenizer, model, keyword_1 = "music and sou
     
     return (best_node_1, best_similarity_1, best_node_2, best_similarity_2), path, path_graph, shortest_path_length, fname, graph_GraphML
 
-import community as community_louvain
+import community as community_louvain  # This is the python-louvain package
 import math
 
 def describe_communities(G, N=10):
@@ -552,13 +467,8 @@ def describe_communities_with_plots_complex (G, N=10, N_nodes=5, data_dir='./'):
     plt.savefig(f'{data_dir}/top_nodes_by_degree_combined.svg')
     plt.show()
 
-import networkx as nx
-import numpy as np
-import matplotlib.pyplot as plt
 from scipy.stats import powerlaw
-import networkx as nx
 import powerlaw
-import matplotlib.pyplot as plt
 
 def is_scale_free_simple(G, plot_distribution=True, data_dir='./'):
     """
@@ -919,9 +829,6 @@ def process_path_combination(G, node_embeddings, tokenizer, model, keyword_1, ke
     paths_details.append((start_id, end_id, path_list, path_list_vis, path_list_string))
     return paths_details
 
-import networkx as nx
-import matplotlib.pyplot as plt
-
 def split_label(label, words_per_line=3):
     """Splits a label into multiple lines, with a specified number of words per line."""
     words = label.split()
@@ -1131,13 +1038,9 @@ def visualize_paths_pretty_spiral(paths, filename='graph_pretty.svg', display_gr
 
     return G
 
-import os
-import networkx as nx
-import matplotlib.pyplot as plt
 from collections import Counter
 from networkx.algorithms.community import greedy_modularity_communities
 from networkx.algorithms.community.quality import modularity
-import community as community_louvain  # This is the python-louvain package
 
 def analyze_and_visualize_community_structure(G, data_dir='./', root='graph', algorithm='greedy_modularity'):
     os.makedirs(data_dir, exist_ok=True)
@@ -1210,21 +1113,11 @@ def analyze_and_visualize_community_structure(G, data_dir='./', root='graph', al
 
     plt.show()
 
-import os
-import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import numpy as np
-import networkx as nx
-from tqdm import tqdm
+from tqdm import tqdm # conflicts with above from tqdm.notebook import tqdm?
 from networkx.algorithms.community import greedy_modularity_communities, modularity
 from networkx.algorithms.isomorphism import GraphMatcher
 from networkx.drawing.nx_agraph import graphviz_layout
-import matplotlib.pyplot as plt
-import networkx as nx
-from networkx.algorithms.community import greedy_modularity_communities
-from networkx.drawing.nx_agraph import graphviz_layout
-import matplotlib.cm as cm
-import numpy as np
 from networkx.algorithms.components import connected_components
 
 def visualize_community_structure_nolabels(G, title="Graph", ax=None):
@@ -1458,7 +1351,6 @@ def return_giant_component_of_graph (G_new ):
    
     return G_new#, node_embeddings
 
-import networkx as nx
 def calculate_bridging_coefficient(G):
     # Calculate the degree for all nodes
     degrees = dict(G.degree())
@@ -1578,16 +1470,7 @@ def use_graph_and_reason_over_triples (path_graph, generate,
 
     return response ,  path_graph, shortest_path_length, fname, graph_GraphML
 
-
-
-
-import networkx as nx
-import random
 from heapq import heappop, heappush
-from datetime import datetime
-from pyvis.network import Network
-from copy import deepcopy
-import numpy as np
 
 # Function to create the directory if it doesn't exist
 def ensure_directory_exists(directory):
@@ -1816,15 +1699,7 @@ def heuristic_path_with_embeddings_with_randomization_waypoints(G, embedding_tok
 # Visualization
 ##############################
 
-import networkx as nx
-import random
-import matplotlib.pyplot as plt
-from datetime import datetime
-from pyvis.network import Network
-from copy import deepcopy
-import numpy as np
-import community as community_louvain
-from tqdm.notebook import tqdm
+from tqdm.notebook import tqdm # conflicts with earlier from tqdm import tqdm?
 
 # Function to precompute basic properties for the original graph
 def precompute_basic_properties(G):

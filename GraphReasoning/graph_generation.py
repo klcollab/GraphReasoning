@@ -2,103 +2,43 @@ from GraphReasoning.graph_tools import *
 from GraphReasoning.utils import *
 from GraphReasoning.graph_analysis import *
 
+import sys
 import copy
-
+from copy import deepcopy
+import os
 import re
-from IPython.display import display, Markdown
-
 import markdown2
 import pdfkit
-
- 
 import uuid
-import pandas as pd
-import numpy as np
-
+import random
+import json
+import time
+from IPython.display import display, Markdown
 import pandas as pd
 import numpy as np
 import networkx as nx
-import os
-from langchain.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
-from langchain.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
+from langchain_community.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
+from langchain_community.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pathlib import Path
-import random
 from pyvis.network import Network
-
 from tqdm.notebook import tqdm
-
 import itertools
-import seaborn as sns
 palette = "hls"
-
-import uuid
-import pandas as pd
-import numpy as np
-
-from transformers import AutoTokenizer, AutoModel
-import torch
-from scipy.spatial.distance import cosine
-from sklearn.decomposition import PCA
-import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-import seaborn as sns  # For more attractive plotting
-
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
- 
-import pandas as pd
-
 import transformers
 from transformers import logging
-
-logging.set_verbosity_error()
-
-import re
-from IPython.display import display, Markdown
-
-import markdown2
-import pdfkit
-
- 
-import uuid
-import pandas as pd
-import numpy as np
-
-import pandas as pd
-import numpy as np
-import networkx as nx
-import os
-from langchain.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
-from langchain.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from pathlib import Path
-import random
-from pyvis.network import Network
-
-from tqdm.notebook import tqdm
-
-import seaborn as sns
-palette = "hls"
-
-import uuid
-import pandas as pd
-import numpy as np
-
 from transformers import AutoTokenizer, AutoModel
 import torch
 from scipy.spatial.distance import cosine
-from sklearn.decomposition import PCA
-import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import seaborn as sns  # For more attractive plotting
 
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
+from yachalk import chalk
+
+logging.set_verbosity_error()
+palette = "hls"
 
 # Code based on: https://github.com/rahulnyk/knowledge_graph
 
@@ -158,11 +98,7 @@ def graph2Df(nodes_list) -> pd.DataFrame:
 
     return graph_dataframe
 
-import sys
-from yachalk import chalk
 sys.path.append("..")
-
-import json
 
 def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:latest",
                 repeat_refine=0,verbatim=False,
@@ -517,9 +453,6 @@ def make_graph_from_text (txt,generate,
         
     print ("Graph statistics: ", res_stat)
     return graph_HTML, graph_GraphML, G, net, output_pdf
-
-import time
-from copy import deepcopy
 
 def add_new_subgraph_from_text(txt,generate,node_embeddings,tokenizer, model,
                                original_graph_path_and_fname,
