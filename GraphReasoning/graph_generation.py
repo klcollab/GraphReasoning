@@ -217,7 +217,8 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
     USER_PROMPT = f"Context: ```{input}``` \n\nOutput: "
     
     print (".", end ="")
-    response  =  generate( system_prompt=SYS_PROMPT_GRAPHMAKER, prompt=USER_PROMPT)
+    #response  =  generate( system_prompt=SYS_PROMPT_GRAPHMAKER, prompt=USER_PROMPT)
+    response  =  generate( prompts=[SYS_PROMPT_GRAPHMAKER, USER_PROMPT])
     if verbatim:
         print ("---------------------\nFirst result: ", response)
    
@@ -232,13 +233,16 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
                   f'Read this ontology: ```{response}```'
                  f'\n\nImprove the ontology by renaming nodes so that they have consistent labels that are widely used in the field of materials science.'''
                  '')
-    response  =  generate( system_prompt=SYS_PROMPT_FORMAT,
-                          prompt=USER_PROMPT)
+    #response  =  generate( system_prompt=SYS_PROMPT_FORMAT,
+    #                      prompt=USER_PROMPT)
+    response  =  generate( prompts=[SYS_PROMPT_FORMAT,USER_PROMPT])
     if verbatim:
         print ("---------------------\nAfter improve: ", response)
     
     USER_PROMPT = f"Context: ```{response}``` \n\n Fix to make sure it is proper format. "
-    response  =  generate( system_prompt=SYS_PROMPT_FORMAT, prompt=USER_PROMPT)
+    #response  =  generate( system_prompt=SYS_PROMPT_FORMAT, prompt=USER_PROMPT)
+    response  =  generate(prompts=[SYS_PROMPT_FORMAT, USER_PROMPT])
+    response = response.generations[0][0].text
     response =   response.replace ('\\', '' )
     if verbatim:
         print ("---------------------\nAfter clean: ", response)
@@ -252,26 +256,31 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
                           f'Read this ontology: ```{response}```'
                           f'\n\nInsert additional triplets to the original list, in the same JSON format. Repeat original AND new triplets.\n'
                          '') 
-            response  =  generate( system_prompt=SYS_PROMPT_GRAPHMAKER, 
-                                  prompt=USER_PROMPT)
+            #response  =  generate( system_prompt=SYS_PROMPT_GRAPHMAKER, 
+            #                      prompt=USER_PROMPT)
+            response  =  generate(prompts=[SYS_PROMPT_GRAPHMAKER,USER_PROMPT])
             if verbatim:
                 print ("---------------------\nAfter adding triplets: ", response)
             USER_PROMPT = f"Context: ```{response}``` \n\n Fix to make sure it is proper format. "
-            response  =  generate( system_prompt=SYS_PROMPT_FORMAT, prompt=USER_PROMPT)
-            response =   response.replace ('\\', '' )
+            response  =  generate( prompts=[SYS_PROMPT_FORMAT, USER_PROMPT])
+            response = response.generations[0][0].text
+            response = response.replace ('\\', '' )
             USER_PROMPT = (f'Read this context: ```{input}```.'
                           f'Read this ontology: ```{response}```'
                          f'\n\nRevise the ontology by renaming nodes and edges so that they have consistent and concise labels.'''
                         
                          '') 
-            response  =  generate( system_prompt=SYS_PROMPT_FORMAT,  
-                                  prompt=USER_PROMPT)            
+            #response  =  generate( system_prompt=SYS_PROMPT_FORMAT,  
+            #                      prompt=USER_PROMPT)            
+            response  =  generate(prompts=[SYS_PROMPT_FORMAT,USER_PROMPT])            
             if verbatim:
                 print (f"---------------------\nAfter refine {rep}/{repeat_refine}: ", response)
 
      
     USER_PROMPT = f"Context: ```{response}``` \n\n Fix to make sure it is proper format. "
-    response  =  generate( system_prompt=SYS_PROMPT_FORMAT, prompt=USER_PROMPT)
+    #response  =  generate( system_prompt=SYS_PROMPT_FORMAT, prompt=USER_PROMPT)
+    response  =  generate(prompts=[SYS_PROMPT_FORMAT, USER_PROMPT])
+    response = response.generations[0][0].text
     response =   response.replace ('\\', '' )
     
     try:
