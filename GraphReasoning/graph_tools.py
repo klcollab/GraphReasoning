@@ -1,117 +1,45 @@
+import os
+import re
 import heapq
-
+import markdown2
+import pdfkit
+import time
+import uuid
 import copy
+import random
+import transformers
+from transformers import logging
 from transformers import AutoTokenizer, AutoModel
 import torch
 from scipy.spatial.distance import cosine
-from sklearn.decomposition import PCA
-import numpy as np
+from scipy.spatial.distance import cdist
+from scipy.spatial import Voronoi, voronoi_plot_2d
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
+from sklearn.metrics.pairwise import euclidean_distances
+from sklearn.mixture import GaussianMixture
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+import pandas as pd  # Assuming colors2Community returns a pandas DataFrame
 import matplotlib.pyplot as plt
 import seaborn as sns  # For more attractive plotting
 
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
+from powerlaw import Fit
 import community as community_louvain
-import networkx as nx
-import pandas as pd  # Assuming colors2Community returns a pandas DataFrame
-
-import seaborn as sns
-import re
 from IPython.display import display, Markdown
-
-import markdown2
-import pdfkit
-
-import time
-
-import uuid
-import pandas as pd
-import numpy as np
-
-import pandas as pd
-import numpy as np
 import networkx as nx
-import os
-from langchain.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
-from langchain.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
+from langchain_community.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
+from langchain_community.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pathlib import Path
-import random
 from pyvis.network import Network
 
 from tqdm.notebook import tqdm
 
-import seaborn as sns
 palette = "hls"
-
-import uuid
-import pandas as pd
-import numpy as np
-
-from transformers import AutoTokenizer, AutoModel
-import torch
-from scipy.spatial.distance import cosine
-from sklearn.decomposition import PCA
-import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-import seaborn as sns  # For more attractive plotting
-
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-import transformers
-from transformers import logging
 
 logging.set_verbosity_error()
 
-import re
-
-from IPython.display import display, Markdown
-
-import markdown2
-import pdfkit
-
- 
-import uuid
-import pandas as pd
-import numpy as np
-
-import pandas as pd
-import numpy as np
-import networkx as nx
-import os
-from langchain.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
-from langchain.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from pathlib import Path
-import random
-from pyvis.network import Network
-
-from tqdm.notebook import tqdm
-
-import seaborn as sns
-palette = "hls"
-
-import uuid
-import pandas as pd
-import numpy as np
-
-from transformers import AutoTokenizer, AutoModel
-import torch
-from scipy.spatial.distance import cosine
-from sklearn.decomposition import PCA
-import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-import seaborn as sns  # For more attractive plotting
-
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-  
 # Function to generate embeddings
 def generate_node_embeddings(graph, tokenizer, model):
     embeddings = {}
@@ -265,7 +193,6 @@ def visualize_embeddings_2d_pretty(embeddings, n_clusters=3,  data_dir='./'):
     for cluster, count in cluster_counts.items():
         print(f'Cluster {cluster}: {count} items')
 
-from scipy.spatial.distance import cdist
 
 def visualize_embeddings_2d_pretty_and_sample(embeddings, n_clusters=3, n_samples=5, data_dir='./',
                                              alpha=0.7, edgecolors='none', s=50,):
@@ -318,13 +245,6 @@ def visualize_embeddings_2d_pretty_and_sample(embeddings, n_clusters=3, n_sample
         
         print(f'Cluster {cluster}: {len(cluster_vectors)} items')
         print(f'Closest {n_samples} node IDs to centroid:', closest_node_ids)
-
-import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.metrics.pairwise import euclidean_distances
-from sklearn.mixture import GaussianMixture
-from scipy.spatial import Voronoi, voronoi_plot_2d
-import matplotlib.pyplot as plt
 
 def visualize_embeddings_with_gmm_density_voronoi_and_print_top_samples(embeddings, n_clusters=5, top_n=3, data_dir='./',s=50):
     # Extract the embedding vectors
@@ -714,10 +634,6 @@ def simplify_node_name_with_llm(node_name, generate, max_tokens=2048, temperatur
    
     return simplified_name
 
-import networkx as nx
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
-
 def simplify_graph_simple(graph_, node_embeddings, tokenizer, model, similarity_threshold=0.9, use_llm=False,
                   data_dir_output='./',
                   graph_root='simple_graph', verbatim=False,max_tokens=2048, temperature=0.3,generate=None,
@@ -769,19 +685,8 @@ def simplify_graph_simple(graph_, node_embeddings, tokenizer, model, similarity_
     
     return new_graph, updated_embeddings
 
-import networkx as nx
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
-from tqdm import tqdm
-import matplotlib.pyplot as plt
-from powerlaw import Fit
-
 # Assuming regenerate_node_embeddings is defined as provided earlier
-
-import numpy as np
-import networkx as nx
-from sklearn.metrics.pairwise import cosine_similarity
-from tqdm import tqdm
+from tqdm import tqdm # conflicts with earlier from tqdm.notebook import tqdm?
 
 def simplify_node_name_with_llm(node_name, max_tokens, temperature):
     # This is a placeholder for the actual function that uses a language model
@@ -977,16 +882,13 @@ def get_text_associated_with_node(G, node_identifier ='bone', ):
         concatenated_texts=''
     return concatenated_texts 
 
-import networkx as nx
 import json
 from copy import deepcopy
-from tqdm import tqdm
 
 def save_graph_with_text_as_JSON(G_or, data_dir='./', graph_name='my_graph.graphml'):
     G = deepcopy(G_or)
 
     # Ensure correct path joining
-    import os
     fname = os.path.join(data_dir, graph_name)
 
     for _, data in tqdm(G.nodes(data=True)):
@@ -1004,7 +906,6 @@ def save_graph_with_text_as_JSON(G_or, data_dir='./', graph_name='my_graph.graph
 
 def load_graph_with_text_as_JSON(data_dir='./', graph_name='my_graph.graphml'):
     # Ensure correct path joining
-    import os
     fname = os.path.join(data_dir, graph_name)
 
     G = nx.read_graphml(fname)
@@ -1026,11 +927,6 @@ def load_graph_with_text_as_JSON(data_dir='./', graph_name='my_graph.graphml'):
                     pass
 
     return G
-
-from copy import deepcopy
-import networkx as nx
-from tqdm import tqdm
-import os
 
 def save_graph_without_text(G_or, data_dir='./', graph_name='my_graph.graphml'):
     G = deepcopy(G_or)
@@ -1078,23 +974,6 @@ def print_nodes_and_labels (G, N=10):
         
 
     return ch_list
-
-import pandas as pd
-import numpy as np
-import networkx as nx
-from tqdm import tqdm
-from pathlib import Path
-from copy import deepcopy
-import json
-from tqdm import tqdm
-import pandas as pd
-import networkx as nx
-import os 
-import pandas as pd
-import numpy as np
-import networkx as nx
-from tqdm import tqdm
-import json
 
 def make_graph_from_text_withtext(graph_file_list, chunk_file_list,
                                   include_contextual_proximity=False,
@@ -1166,10 +1045,6 @@ def make_graph_from_text_withtext(graph_file_list, chunk_file_list,
         G_total.nodes[node]['texts'] = list(texts)  # Convert from set to list
 
     return G_total
-import numpy as np
-from tqdm import tqdm
-import networkx as nx
-from sklearn.metrics.pairwise import cosine_similarity
 
 def regenerate_node_embeddings(graph, nodes_to_recalculate, tokenizer, model):
     """
