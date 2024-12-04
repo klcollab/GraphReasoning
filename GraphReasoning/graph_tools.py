@@ -465,7 +465,7 @@ def graph_statistics_and_plots_for_large_graphs (G, data_dir='./', include_centr
     plt.xlabel(xlab_0)
     plt.ylabel(ylab_0)
     plt.savefig(f'{data_dir}/{plt_title}_{root}.svg')
-    plt.show()
+    #plt.show()
     
     if make_graph_plot:
         
@@ -477,7 +477,7 @@ def graph_statistics_and_plots_for_large_graphs (G, data_dir='./', include_centr
         nx.draw_networkx(G, pos, node_color=list(partition.values()), node_size=20, cmap=cmap, with_labels=False)
         plt.title('Community Structure')
         plt.savefig(f'{data_dir}/community_structure_{root}.svg')
-        plt.show()
+        #plt.show()
         plt.close()
 
     # Save statistics

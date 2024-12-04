@@ -17,9 +17,11 @@ from IPython.display import display, Markdown
 import pandas as pd
 import numpy as np
 import networkx as nx
+import community as community_louvain
 from langchain_community.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
 from langchain_community.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_core.prompts import PromptTemplate
 from pathlib import Path
 from pyvis.network import Network
 from tqdm.notebook import tqdm
@@ -38,7 +40,6 @@ import seaborn as sns  # For more attractive plotting
 from yachalk import chalk
 
 logging.set_verbosity_error()
-palette = "hls"
 
 # Code based on: https://github.com/rahulnyk/knowledge_graph
 
@@ -53,6 +54,19 @@ def documents2Dataframe(documents) -> pd.DataFrame:
         row = {
             "text": chunk,
             **chunk.metadata,
+            "chunk_id": uuid.uuid4().hex,
+        }
+        rows = rows + [row]
+
+    df = pd.DataFrame(rows)
+    return df
+
+def texts2Dataframe(chunks, source='None') -> pd.DataFrame:
+    rows = []
+    for chunk in chunks:
+        row = {
+            "text": chunk,
+            'source': source,
             "chunk_id": uuid.uuid4().hex,
         }
         rows = rows + [row]
@@ -107,7 +121,8 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
     SYS_PROMPT_GRAPHMAKER = (
         "You are a network ontology graph maker who extracts terms and their relations from a given context, using category theory. "
         "You are provided with a context chunk (delimited by ```) Your task is to extract the ontology "
-        "of terms mentioned in the given context. These terms should represent the key concepts as per the context, including well-defined and widely used names of materials, systems, methods. \n\n"
+        "of terms mentioned in the given context. These terms should represent the key concepts as per the context, including "
+        "well-defined and widely used names of materials, systems, methods. Use only terms from the context. \n\n"
         "Format your output as a list of JSON. Each element of the list contains a pair of terms"
         "and the relation between them, like the follwing: \n"
         "[\n"
@@ -154,7 +169,9 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
     
     print (".", end ="")
     #response  =  generate( system_prompt=SYS_PROMPT_GRAPHMAKER, prompt=USER_PROMPT)
-    response  =  generate( prompts=[SYS_PROMPT_GRAPHMAKER, USER_PROMPT])
+    #response  =  generate( prompts=[SYS_PROMPT_GRAPHMAKER, USER_PROMPT])
+    response  =  generate(prompts=[SYS_PROMPT_GRAPHMAKER+'\n'+USER_PROMPT])
+    response = response.generations[0][0].text
     if verbatim:
         print ("---------------------\nFirst result: ", response)
    
@@ -171,13 +188,16 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
                  '')
     #response  =  generate( system_prompt=SYS_PROMPT_FORMAT,
     #                      prompt=USER_PROMPT)
-    response  =  generate( prompts=[SYS_PROMPT_FORMAT,USER_PROMPT])
+    #response  =  generate( prompts=[SYS_PROMPT_FORMAT,USER_PROMPT])
+    response  =  generate(prompts=[SYS_PROMPT_FORMAT+'\n'+USER_PROMPT])
+    response = response.generations[0][0].text
     if verbatim:
         print ("---------------------\nAfter improve: ", response)
     
     USER_PROMPT = f"Context: ```{response}``` \n\n Fix to make sure it is proper format. "
     #response  =  generate( system_prompt=SYS_PROMPT_FORMAT, prompt=USER_PROMPT)
-    response  =  generate(prompts=[SYS_PROMPT_FORMAT, USER_PROMPT])
+    #response  =  generate(prompts=[SYS_PROMPT_FORMAT, USER_PROMPT])
+    response  =  generate(prompts=[SYS_PROMPT_FORMAT+'\n'+USER_PROMPT])            
     response = response.generations[0][0].text
     response =   response.replace ('\\', '' )
     if verbatim:
@@ -194,11 +214,14 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
                          '') 
             #response  =  generate( system_prompt=SYS_PROMPT_GRAPHMAKER, 
             #                      prompt=USER_PROMPT)
-            response  =  generate(prompts=[SYS_PROMPT_GRAPHMAKER,USER_PROMPT])
+            #response  =  generate(prompts=[SYS_PROMPT_GRAPHMAKER,USER_PROMPT])
+            response  =  generate(prompts=[SYS_PROMPT_GRAPHMAKER+'\n'+USER_PROMPT])            
+            response = response.generations[0][0].text
             if verbatim:
                 print ("---------------------\nAfter adding triplets: ", response)
             USER_PROMPT = f"Context: ```{response}``` \n\n Fix to make sure it is proper format. "
-            response  =  generate( prompts=[SYS_PROMPT_FORMAT, USER_PROMPT])
+            #response  =  generate( prompts=[SYS_PROMPT_FORMAT, USER_PROMPT])
+            response  =  generate(prompts=[SYS_PROMPT_FORMAT+'\n'+USER_PROMPT])            
             response = response.generations[0][0].text
             response = response.replace ('\\', '' )
             USER_PROMPT = (f'Read this context: ```{input}```.'
@@ -208,16 +231,19 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
                          '') 
             #response  =  generate( system_prompt=SYS_PROMPT_FORMAT,  
             #                      prompt=USER_PROMPT)            
-            response  =  generate(prompts=[SYS_PROMPT_FORMAT,USER_PROMPT])            
+            #response  =  generate(prompts=[SYS_PROMPT_FORMAT,USER_PROMPT])            
+            response  =  generate(prompts=[SYS_PROMPT_FORMAT+'\n'+USER_PROMPT])            
+            response = response.generations[0][0].text
             if verbatim:
                 print (f"---------------------\nAfter refine {rep}/{repeat_refine}: ", response)
 
      
     USER_PROMPT = f"Context: ```{response}``` \n\n Fix to make sure it is proper format. "
     #response  =  generate( system_prompt=SYS_PROMPT_FORMAT, prompt=USER_PROMPT)
-    response  =  generate(prompts=[SYS_PROMPT_FORMAT, USER_PROMPT])
+    #response  =  generate(prompts=[SYS_PROMPT_FORMAT, USER_PROMPT])
+    response = generate(prompts=[SYS_PROMPT_FORMAT+'\n'+USER_PROMPT])
     response = response.generations[0][0].text
-    response =   response.replace ('\\', '' )
+    response = response.replace ('\\', '' )
     
     try:
         response=extract (response)
@@ -306,7 +332,7 @@ def make_graph_from_text (txt,generate,
     if verbatim:
         display(Markdown (pages[0]) )
     
-    df = documents2Dataframe(pages)
+    df = texts2Dataframe(pages)
 
     ## To regenerate the graph with LLM, set this to True
     regenerate = True
