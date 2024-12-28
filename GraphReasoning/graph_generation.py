@@ -116,14 +116,16 @@ sys.path.append("..")
 def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:latest",
                 repeat_refine=0,verbatim=False,
                ):
-    
+
+    print("Chunk to process: "+input)
     SYS_PROMPT_GRAPHMAKER = (
         "You are a network ontology graph maker who extracts terms and their relations from a given context, using category theory. "
         "You are provided with a context chunk (delimited by ```) Your task is to extract the ontology "
         "of terms mentioned in the given context. These terms should represent the key concepts as per the context, including "
         "well-defined and widely used names of materials, systems, methods. Use only terms from the context. \n\n"
         "Format your output as a list of JSON. Each element of the list contains a pair of terms"
-        "and the relation between them, like the follwing: \n"
+        'and the relation between them. Relations cannot be simple lists. Use connectives like "and" when describing '
+        'complex relations. The follwing are examples: \n'
         "[\n"
         "   {\n"
         '       "node_1": "A concept from extracted ontology",\n'
@@ -183,7 +185,7 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
                     '   }, {...} ]\n'  )    
     USER_PROMPT = (f'Read this context: ```{input}```.'
                   f'Read this ontology: ```{response}```'
-                 f'\n\nImprove the ontology by renaming nodes so that they have consistent labels that are widely used in the field of materials science.'''
+                 f'\n\nImprove the ontology by renaming nodes so that they have consistent labels that are widely used in the fields of biology and medicine.'''
                  '')
     #response  =  generate( system_prompt=SYS_PROMPT_FORMAT,
     #                      prompt=USER_PROMPT)
@@ -218,7 +220,7 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
             response = response.generations[0][0].text
             if verbatim:
                 print ("---------------------\nAfter adding triplets: ", response)
-            USER_PROMPT = f"Context: ```{response}``` \n\n Fix to make sure it is proper format. "
+            USER_PROMPT = f"Context: ```{response}``` \n\n Fix to make sure it is proper format. Edges cannot be lists."
             #response  =  generate( prompts=[SYS_PROMPT_FORMAT, USER_PROMPT])
             response  =  generate(prompts=[SYS_PROMPT_FORMAT+'\n'+USER_PROMPT])            
             response = response.generations[0][0].text
@@ -252,10 +254,10 @@ def graphPrompt(input: str, generate, metadata={}, #model="mistral-openorca:late
     
     try:
         result = json.loads(response)
-        print (result)
+        if verbatim: print (result)
         result = [dict(item, **metadata) for item in result]
     except:
-        print("\n\nERROR ### Here is the buggy response: ", response, "\n\n")
+        print("\n\nERROR ### JSON load failed. Here is the buggy response: ", response, "\n\n")                                                                                                                                             
         result = None
     return result
 
@@ -315,7 +317,8 @@ def make_graph_from_text (txt,generate,
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)     
      
-    outputdirectory = Path(f"./{data_dir}/") #where graphs are stored from graph2df function
+    outputdirectory = Path(f"{data_dir}/intermediate_data/") #where graphs are stored from graph2df function                                                                                                                                 
+    if not os.path.exists(outputdirectory): os.makedirs(outputdirectory)
     
  
     splitter = RecursiveCharacterTextSplitter(
@@ -339,8 +342,6 @@ def make_graph_from_text (txt,generate,
     if regenerate:
         concepts_list = df2Graph(df,generate,repeat_refine=repeat_refine,verbatim=verbatim) #model='zephyr:latest' )
         dfg1 = graph2Df(concepts_list)
-        if not os.path.exists(outputdirectory):
-            os.makedirs(outputdirectory)
         
         dfg1.to_csv(outputdirectory/f"{graph_root}_graph.csv", sep="|", index=False)
         df.to_csv(outputdirectory/f"{graph_root}_chunks.csv", sep="|", index=False)
@@ -545,7 +546,7 @@ def add_new_subgraph_from_text(txt,generate,node_embeddings,tokenizer, model,
         
         res_newgraph=graph_statistics_and_plots_for_large_graphs(G_loaded, data_dir=data_dir_output,include_centrality=False,
                                                        make_graph_plot=False,root='new_graph')
-        print (res_newgraph)
+        #print (res_newgraph)
         
         G_new = nx.compose(G,G_loaded)
 
