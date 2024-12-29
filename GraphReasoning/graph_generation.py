@@ -367,10 +367,11 @@ def make_graph_from_text (txt,generate,
     else:
         dfg=dfg1
         
-    
+    def list_tolerant_join(s): return ','.join(s.to_string())
     dfg = (
         dfg.groupby(["node_1", "node_2"])
-        .agg({"chunk_id": ",".join, "edge": ','.join, 'count': 'sum'})
+        #.agg({"chunk_id": ",".join, "edge": ','.join, 'count': 'sum'})
+        .agg({"chunk_id": list_tolerant_join, "edge": list_tolerant_join, 'count': 'sum'})
         .reset_index()
     )
     #dfg
