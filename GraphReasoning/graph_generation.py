@@ -20,7 +20,7 @@ import networkx as nx
 import community as community_louvain
 from langchain_community.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
 from langchain_community.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pathlib import Path
 from pyvis.network import Network
 from tqdm.notebook import tqdm
